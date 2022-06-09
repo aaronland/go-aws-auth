@@ -2,8 +2,8 @@ package auth
 
 import (
 	"context"
-	"testing"
 	_ "fmt"
+	"testing"
 )
 
 func TestNewConfig(t *testing.T) {

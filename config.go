@@ -6,18 +6,20 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
+	"net/url"
 	"os/user"
 	"path/filepath"
+	"sort"
 	"strings"
-	"net/url"
 )
 
 // null_cfg is a placeholder to return in error contexts.
 var null_cfg aws.Config
 
-func CredentialsStrings() []string {
+// CredentialsStringPatterns() returns the list of valid credential strings patterns.
+func CredentialsStringPatterns() []string {
 
-	valid := []string{
+	patterns := []string{
 		"anon:",
 		"env:",
 		"iam:",
@@ -26,11 +28,21 @@ func CredentialsStrings() []string {
 		"static:{KEY}:{SECRET}:{TOKEN}",
 	}
 
-	return valid
+	sort.Strings(patterns)
+	return patterns
 }
 
-// ...in the form of
+// NewConfig() returns a new `aws.Config` derived from 'uri' which is expected to be configured
+// in the form of:
 //	aws://{AWS_REGION}?credentials={CREDENTIALS_STRING}
+// Where {AWS_REGION} is a valid AWS region name and {CREDENTIALS_STRING} is a string in the form of:
+//	`anon:` Use anonymous credentials
+//	`env:` Use credentials derived from "AWS_" environment variables
+//	`iam:` Use IAM credentials
+//	`{PROFILE}` Use a specific profile defined by {PROFILE} from the default credentials file
+//	`{PATH}:{PROFILE}` Use a specific profile definied by {PROFILE} from the credentials file defined by {PATH}
+//	`static:{KEY}:{SECRET}:{TOKEN}` Read credentials as positional elements in a string
+//	`` If credentials are passed as an empty string then use default credentials strategy defined by `aws-sdk-go-v2`
 func NewConfig(ctx context.Context, uri string) (aws.Config, error) {
 
 	u, err := url.Parse(uri)
@@ -55,6 +67,15 @@ func NewConfig(ctx context.Context, uri string) (aws.Config, error) {
 	return cfg, nil
 }
 
+// NewConfigWithCredentialsString() returns a new `aws.Config` derived from 'str_creds' which is expected to be passed
+// in as one of the following:
+//	`anon:` Use anonymous credentials
+//	`env:` Use credentials derived from "AWS_" environment variables
+//	`iam:` Use IAM credentials
+//	`{PROFILE}` Use a specific profile defined by {PROFILE} from the default credentials file
+//	`{PATH}:{PROFILE}` Use a specific profile definied by {PROFILE} from the credentials file defined by {PATH}
+//	`static:{KEY}:{SECRET}:{TOKEN}` Read credentials as positional elements in a string
+//	`` If credentials are passed as an empty string then use default credentials strategy defined by `aws-sdk-go-v2`
 func NewConfigWithCredentialsString(ctx context.Context, str_creds string) (aws.Config, error) {
 
 	if strings.HasPrefix(str_creds, "anon:") {
@@ -64,7 +85,6 @@ func NewConfigWithCredentialsString(ctx context.Context, str_creds string) (aws.
 		return config.LoadDefaultConfig(ctx,
 			config.WithCredentialsProvider(provider),
 		)
-
 
 	} else if strings.HasPrefix(str_creds, "static:") {
 
