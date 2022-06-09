@@ -2,7 +2,7 @@
 
 Go package providing methods and tools for determining or assigning AWS credentials.
 
-This package overlaps, at least at a conceptual level, with the [aaronland/go-aws-session](https://github.com/aaronland/go-aws-session) package. The two packages should eventually be reconciled. Today they are not.
+This package targets [aws-sdk-go-v2](https://github.com/aws/aws-sdk-go-v2/). For similar functionality targeting `aws-sdk-go` please consult the [aaronland/go-aws-session](https://github.com/aaronland/go-aws-session) package.
 
 ## Documentation
 
@@ -66,4 +66,4 @@ Usage of ./bin/aws-set-env:
 
 ## See also:
 
-* https://github.com/aaronland/go-aws-session
+* https://github.com/aws/aws-sdk-go-v2/
