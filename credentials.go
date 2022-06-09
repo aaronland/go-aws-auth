@@ -13,8 +13,10 @@ import (
 
 // type Credentials defines a struct for encapsulating information about an .ini style AWS credentials file
 type Credentials struct {
+	// Path is the path to the credentials file on disk
 	Path string
-	ini  *ini.File
+	// ini is the `ini.File` instance derived from the credentials file
+	ini *ini.File
 }
 
 // NewCredentials will iterate through the list of default shared credentials files locations and return a

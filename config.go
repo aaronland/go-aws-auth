@@ -3,34 +3,37 @@ package auth
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
+	"os/user"
 	"path/filepath"
 	"strings"
-	"os/user"
 )
 
-func NewConfigWithCredentials(ctx context.Context, str_creds string) (*config.Config, error) {
+func CredentialsStrings() []string {
 
-	cfg, err := config.LoadDefaultConfig(ctx)
-
-	if err != nil {
-		return nil, fmt.Errorf("Failed to load default config, %w", err)
+	valid := []string{
+		"anon:",
+		"env:",
+		"iam:",
+		"{PROFILE}",
+		"{PATH}:{PROFILE}",
+		"static:{KEY}:{SECRET}:{TOKEN}",
 	}
+
+	return valid
+}
+
+func NewConfigWithCredentialsString(ctx context.Context, str_creds string) (config.Config, error) {
 
 	if strings.HasPrefix(str_creds, "anon:") {
 
-		creds := credentials.AnonymousCredentials
-		cfg.WithCredentials(creds)
+		provider := aws.AnonymousCredentials{}
 
-	} else if strings.HasPrefix(str_creds, "env:") {
-
-		creds := credentials.NewEnvCredentials()
-		cfg.WithCredentials(creds)
-
-	} else if strings.HasPrefix(str_creds, "iam:") {
-
-		// assume an IAM role suffient for doing whatever
+		return config.LoadDefaultConfig(ctx,
+			config.WithCredentialsProvider(provider),
+		)
 
 	} else if strings.HasPrefix(str_creds, "static:") {
 
@@ -40,12 +43,19 @@ func NewConfigWithCredentials(ctx context.Context, str_creds string) (*config.Co
 			return nil, fmt.Errorf("Expected (4) components for 'static:' credentials URI but got %d", len(details))
 		}
 
-		id := details[1]
-		key := details[2]
-		secret := details[3]
+		key := details[1]
+		secret := details[2]
+		token := details[3]
 
-		creds := credentials.NewStaticCredentials(id, key, secret)
-		cfg.WithCredentials(creds)
+		provider := credentials.NewStaticCredentialsProvider(key, secret, token)
+
+		return config.LoadDefaultConfig(ctx,
+			config.WithCredentialsProvider(provider),
+		)
+
+	} else if str_creds == "iam:" || str_creds == "env:" {
+
+		return config.LoadDefaultConfig(ctx)
 
 	} else if str_creds != "" {
 
@@ -59,7 +69,7 @@ func NewConfigWithCredentials(ctx context.Context, str_creds string) (*config.Co
 			whoami, err := user.Current()
 
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("Failed to determine current user, %w", err)
 			}
 
 			dotaws := filepath.Join(whoami.HomeDir, ".aws")
@@ -72,82 +82,21 @@ func NewConfigWithCredentials(ctx context.Context, str_creds string) (*config.Co
 			path, err := filepath.Abs(details[0])
 
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("Failed to derive absolute path for %s, %w", details[0], err)
 			}
 
 			creds_file = path
 			profile = details[1]
 		}
 
-		creds := credentials.NewSharedCredentials(creds_file, profile)
-		cfg.WithCredentials(creds)
+		return config.LoadDefaultConfig(ctx,
+			config.WithSharedCredentialsFiles([]string{creds_file}),
+			config.WithSharedConfigProfile(profile),
+		)
 
 	} else {
 
-		// for backwards compatibility as of 05a6042dc5956c13513bdc5ab4969877013f795c
-		// (20161203/thisisaaronland)
-
-		creds := credentials.NewEnvCredentials()
-		cfg.WithCredentials(creds)
+		return nil, fmt.Errorf("Invalid or unsupported credentials string")
 	}
 
-	return cfg, nil
 }
-
-/*
-
-func NewConfig(uri string) (*config.Config, error) {
-
-	u, err := url.Parse(uri)
-
-	if err != nil {
-		return nil, fmt.Errorf("Failed to parse URL, %w", err)
-	}
-
-	q := u.Query()
-
-	creds := q.Get("credentials")
-	region := q.Get("region")
-
-	if creds == "" {
-		return nil, fmt.Errorf("Missing ?credentials parameter")
-	}
-
-	if region == "" {
-		return nil, fmt.Errorf("Missing ?region parameter")
-	}
-
-	return NewSessionWithCredentials(creds, region)
-}
-
-func NewSessionWithDSN(dsn_str string) (*config.Config, error) {
-
-	dsn_map, err := dsn.StringToDSNWithKeys(dsn_str, "credentials", "region")
-
-	if err != nil {
-		return nil, err
-	}
-
-	return NewSessionWithCredentials(dsn_map["credentials"], dsn_map["region"])
-}
-
-func NewSessionWithCredentials(str_creds string, region string) (*config.Config, error) {
-
-	cfg, err := NewConfigWithCredentialsAndRegion(str_creds, region)
-
-	if err != nil {
-		return nil, err
-	}
-
-	sess := aws_session.New(cfg)
-
-	_, err = sess.Config.Credentials.Get()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return sess, nil
-}
-
-*/
