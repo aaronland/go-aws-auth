@@ -9,7 +9,7 @@ import (
 func TestNewConfig(t *testing.T) {
 
 	uris := []string{
-		"aws://?credentials=anon:&region=us-east-1",
+		"aws://us-east-1?credentials=anon:",
 	}
 
 	ctx := context.Background()

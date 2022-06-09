@@ -12,6 +12,9 @@ import (
 	"net/url"
 )
 
+// null_cfg is a placeholder to return in error contexts.
+var null_cfg aws.Config
+
 func CredentialsStrings() []string {
 
 	valid := []string{
@@ -26,8 +29,8 @@ func CredentialsStrings() []string {
 	return valid
 }
 
-var null_cfg aws.Config
-
+// ...in the form of
+//	aws://{AWS_REGION}?credentials={CREDENTIALS_STRING}
 func NewConfig(ctx context.Context, uri string) (aws.Config, error) {
 
 	u, err := url.Parse(uri)
@@ -36,10 +39,11 @@ func NewConfig(ctx context.Context, uri string) (aws.Config, error) {
 		return null_cfg, fmt.Errorf("Failed to parse URI, %w", err)
 	}
 
+	region := u.Host
+
 	q := u.Query()
 
 	creds := q.Get("credentials")
-	region := q.Get("region")	
 
 	cfg, err := NewConfigWithCredentialsString(ctx, creds)
 
