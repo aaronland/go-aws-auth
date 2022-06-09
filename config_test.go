@@ -6,6 +6,24 @@ import (
 	_ "fmt"
 )
 
+func TestNewConfig(t *testing.T) {
+
+	uris := []string{
+		"aws://?credentials=anon:&region=us-east-1",
+	}
+
+	ctx := context.Background()
+
+	for _, uri := range uris {
+
+		_, err := NewConfig(ctx, uri)
+
+		if err != nil {
+			t.Fatalf("Unable to create config with URI '%s', %v", uri, err)
+		}
+	}
+}
+
 func TestNewConfigWithCredentials(t *testing.T) {
 
 	creds := []string{
@@ -23,7 +41,7 @@ func TestNewConfigWithCredentials(t *testing.T) {
 
 	for _, str := range creds {
 
-		cfg, err := NewConfigWithCredentialsString(ctx, str)
+		_, err := NewConfigWithCredentialsString(ctx, str)
 
 		if err != nil {
 			t.Fatalf("Unable to create config with credentials '%s', %v", str, err)
