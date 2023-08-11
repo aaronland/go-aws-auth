@@ -10,11 +10,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/aaronland/go-aws-auth"
-	"github.com/whosonfirst/iso8601duration"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/aaronland/go-aws-auth"
+	"github.com/sfomuseum/iso8601duration"	
 )
 
 func readline(prompt string) string {

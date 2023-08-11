@@ -3,12 +3,12 @@ package auth
 import (
 	"context"
 	"fmt"
+	"os"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	config "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sts/types"
-	"github.com/go-ini/ini"
-	_ "log"
-	"os"
+	"github.com/go-ini/ini"	
 )
 
 // type Credentials defines a struct for encapsulating information about an .ini style AWS credentials file

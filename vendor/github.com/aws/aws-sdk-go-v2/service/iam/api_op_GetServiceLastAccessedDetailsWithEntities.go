@@ -4,33 +4,36 @@ package iam
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	awsmiddleware "github.com/aws/aws-sdk-go-v2/aws/middleware"
 	"github.com/aws/aws-sdk-go-v2/aws/signer/v4"
+	internalauth "github.com/aws/aws-sdk-go-v2/internal/auth"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	smithyendpoints "github.com/aws/smithy-go/endpoints"
 	"github.com/aws/smithy-go/middleware"
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 	"time"
 )
 
 // After you generate a group or policy report using the
-// GenerateServiceLastAccessedDetails operation, you can use the JobId parameter in
-// GetServiceLastAccessedDetailsWithEntities. This operation retrieves the status
-// of your report job and a list of entities that could have used group or policy
-// permissions to access the specified service.
+// GenerateServiceLastAccessedDetails operation, you can use the JobId parameter
+// in GetServiceLastAccessedDetailsWithEntities . This operation retrieves the
+// status of your report job and a list of entities that could have used group or
+// policy permissions to access the specified service.
+//   - Group – For a group report, this operation returns a list of users in the
+//     group that could have used the group’s policies in an attempt to access the
+//     service.
+//   - Policy – For a policy report, this operation returns a list of entities
+//     (users or roles) that could have used the policy in an attempt to access the
+//     service.
 //
-// * Group – For a group report, this
-// operation returns a list of users in the group that could have used the group’s
-// policies in an attempt to access the service.
-//
-// * Policy – For a policy report,
-// this operation returns a list of entities (users or roles) that could have used
-// the policy in an attempt to access the service.
-//
-// You can also use this operation
-// for user or role reports to retrieve details about those entities. If the
-// operation fails, the GetServiceLastAccessedDetailsWithEntities operation returns
-// the reason that it failed. By default, the list of associated entities is sorted
-// by date, with the most recent access listed first.
+// You can also use this operation for user or role reports to retrieve details
+// about those entities. If the operation fails, the
+// GetServiceLastAccessedDetailsWithEntities operation returns the reason that it
+// failed. By default, the list of associated entities is sorted by date, with the
+// most recent access listed first.
 func (c *Client) GetServiceLastAccessedDetailsWithEntities(ctx context.Context, params *GetServiceLastAccessedDetailsWithEntitiesInput, optFns ...func(*Options)) (*GetServiceLastAccessedDetailsWithEntitiesOutput, error) {
 	if params == nil {
 		params = &GetServiceLastAccessedDetailsWithEntitiesInput{}
@@ -57,13 +60,11 @@ type GetServiceLastAccessedDetailsWithEntitiesInput struct {
 	// The service namespace for an Amazon Web Services service. Provide the service
 	// namespace to learn when the IAM entity last attempted to access the specified
 	// service. To learn the service namespace for a service, see Actions, resources,
-	// and condition keys for Amazon Web Services services
-	// (https://docs.aws.amazon.com/service-authorization/latest/reference/reference_policies_actions-resources-contextkeys.html)
+	// and condition keys for Amazon Web Services services (https://docs.aws.amazon.com/service-authorization/latest/reference/reference_policies_actions-resources-contextkeys.html)
 	// in the IAM User Guide. Choose the name of the service to view details for that
 	// service. In the first paragraph, find the service prefix. For example, (service
-	// prefix: a4b). For more information about service namespaces, see Amazon Web
-	// Services service namespaces
-	// (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#genref-aws-service-namespaces)
+	// prefix: a4b) . For more information about service namespaces, see Amazon Web
+	// Services service namespaces (https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#genref-aws-service-namespaces)
 	// in the Amazon Web Services General Reference.
 	//
 	// This member is required.
@@ -77,10 +78,10 @@ type GetServiceLastAccessedDetailsWithEntitiesInput struct {
 
 	// Use this only when paginating results to indicate the maximum number of items
 	// you want in the response. If additional items exist beyond the maximum you
-	// specify, the IsTruncated response element is true. If you do not include this
+	// specify, the IsTruncated response element is true . If you do not include this
 	// parameter, the number of items defaults to 100. Note that IAM might return fewer
 	// results, even when there are more results available. In that case, the
-	// IsTruncated response element returns true, and Marker contains a value to
+	// IsTruncated response element returns true , and Marker contains a value to
 	// include in the subsequent call that tells the service where to continue from.
 	MaxItems *int32
 
@@ -89,23 +90,22 @@ type GetServiceLastAccessedDetailsWithEntitiesInput struct {
 
 type GetServiceLastAccessedDetailsWithEntitiesOutput struct {
 
-	// An EntityDetailsList object that contains details about when an IAM entity (user
-	// or role) used group or policy permissions in an attempt to access the specified
-	// Amazon Web Services service.
+	// An EntityDetailsList object that contains details about when an IAM entity
+	// (user or role) used group or policy permissions in an attempt to access the
+	// specified Amazon Web Services service.
 	//
 	// This member is required.
 	EntityDetailsList []types.EntityDetails
 
-	// The date and time, in ISO 8601 date-time format
-	// (http://www.iso.org/iso/iso8601), when the generated report job was completed or
-	// failed. This field is null if the job is still in progress, as indicated by a
-	// job status value of IN_PROGRESS.
+	// The date and time, in ISO 8601 date-time format (http://www.iso.org/iso/iso8601)
+	// , when the generated report job was completed or failed. This field is null if
+	// the job is still in progress, as indicated by a job status value of IN_PROGRESS .
 	//
 	// This member is required.
 	JobCompletionDate *time.Time
 
-	// The date and time, in ISO 8601 date-time format
-	// (http://www.iso.org/iso/iso8601), when the report job was created.
+	// The date and time, in ISO 8601 date-time format (http://www.iso.org/iso/iso8601)
+	// , when the report job was created.
 	//
 	// This member is required.
 	JobCreationDate *time.Time
@@ -122,11 +122,11 @@ type GetServiceLastAccessedDetailsWithEntitiesOutput struct {
 	// were truncated, you can make a subsequent pagination request using the Marker
 	// request parameter to retrieve more items. Note that IAM might return fewer than
 	// the MaxItems number of results even when there are more results available. We
-	// recommend that you check IsTruncated after every call to ensure that you receive
-	// all your results.
+	// recommend that you check IsTruncated after every call to ensure that you
+	// receive all your results.
 	IsTruncated bool
 
-	// When IsTruncated is true, this element is present and contains the value to use
+	// When IsTruncated is true , this element is present and contains the value to use
 	// for the Marker parameter in a subsequent pagination request.
 	Marker *string
 
@@ -143,6 +143,9 @@ func (c *Client) addOperationGetServiceLastAccessedDetailsWithEntitiesMiddleware
 	}
 	err = stack.Deserialize.Add(&awsAwsquery_deserializeOpGetServiceLastAccessedDetailsWithEntities{}, middleware.After)
 	if err != nil {
+		return err
+	}
+	if err = addlegacyEndpointContextSetter(stack, options); err != nil {
 		return err
 	}
 	if err = addSetLoggerMiddleware(stack, options); err != nil {
@@ -172,7 +175,7 @@ func (c *Client) addOperationGetServiceLastAccessedDetailsWithEntitiesMiddleware
 	if err = awsmiddleware.AddRecordResponseTiming(stack); err != nil {
 		return err
 	}
-	if err = addClientUserAgent(stack); err != nil {
+	if err = addClientUserAgent(stack, options); err != nil {
 		return err
 	}
 	if err = smithyhttp.AddErrorCloseResponseBodyMiddleware(stack); err != nil {
@@ -181,10 +184,16 @@ func (c *Client) addOperationGetServiceLastAccessedDetailsWithEntitiesMiddleware
 	if err = smithyhttp.AddCloseResponseBodyMiddleware(stack); err != nil {
 		return err
 	}
+	if err = addGetServiceLastAccessedDetailsWithEntitiesResolveEndpointMiddleware(stack, options); err != nil {
+		return err
+	}
 	if err = addOpGetServiceLastAccessedDetailsWithEntitiesValidationMiddleware(stack); err != nil {
 		return err
 	}
 	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opGetServiceLastAccessedDetailsWithEntities(options.Region), middleware.Before); err != nil {
+		return err
+	}
+	if err = awsmiddleware.AddRecursionDetection(stack); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {
@@ -194,6 +203,9 @@ func (c *Client) addOperationGetServiceLastAccessedDetailsWithEntitiesMiddleware
 		return err
 	}
 	if err = addRequestResponseLogging(stack, options); err != nil {
+		return err
+	}
+	if err = addendpointDisableHTTPSMiddleware(stack, options); err != nil {
 		return err
 	}
 	return nil
@@ -206,4 +218,127 @@ func newServiceMetadataMiddleware_opGetServiceLastAccessedDetailsWithEntities(re
 		SigningName:   "iam",
 		OperationName: "GetServiceLastAccessedDetailsWithEntities",
 	}
+}
+
+type opGetServiceLastAccessedDetailsWithEntitiesResolveEndpointMiddleware struct {
+	EndpointResolver EndpointResolverV2
+	BuiltInResolver  builtInParameterResolver
+}
+
+func (*opGetServiceLastAccessedDetailsWithEntitiesResolveEndpointMiddleware) ID() string {
+	return "ResolveEndpointV2"
+}
+
+func (m *opGetServiceLastAccessedDetailsWithEntitiesResolveEndpointMiddleware) HandleSerialize(ctx context.Context, in middleware.SerializeInput, next middleware.SerializeHandler) (
+	out middleware.SerializeOutput, metadata middleware.Metadata, err error,
+) {
+	if awsmiddleware.GetRequiresLegacyEndpoints(ctx) {
+		return next.HandleSerialize(ctx, in)
+	}
+
+	req, ok := in.Request.(*smithyhttp.Request)
+	if !ok {
+		return out, metadata, fmt.Errorf("unknown transport type %T", in.Request)
+	}
+
+	if m.EndpointResolver == nil {
+		return out, metadata, fmt.Errorf("expected endpoint resolver to not be nil")
+	}
+
+	params := EndpointParameters{}
+
+	m.BuiltInResolver.ResolveBuiltIns(&params)
+
+	var resolvedEndpoint smithyendpoints.Endpoint
+	resolvedEndpoint, err = m.EndpointResolver.ResolveEndpoint(ctx, params)
+	if err != nil {
+		return out, metadata, fmt.Errorf("failed to resolve service endpoint, %w", err)
+	}
+
+	req.URL = &resolvedEndpoint.URI
+
+	for k := range resolvedEndpoint.Headers {
+		req.Header.Set(
+			k,
+			resolvedEndpoint.Headers.Get(k),
+		)
+	}
+
+	authSchemes, err := internalauth.GetAuthenticationSchemes(&resolvedEndpoint.Properties)
+	if err != nil {
+		var nfe *internalauth.NoAuthenticationSchemesFoundError
+		if errors.As(err, &nfe) {
+			// if no auth scheme is found, default to sigv4
+			signingName := "iam"
+			signingRegion := m.BuiltInResolver.(*builtInResolver).Region
+			ctx = awsmiddleware.SetSigningName(ctx, signingName)
+			ctx = awsmiddleware.SetSigningRegion(ctx, signingRegion)
+
+		}
+		var ue *internalauth.UnSupportedAuthenticationSchemeSpecifiedError
+		if errors.As(err, &ue) {
+			return out, metadata, fmt.Errorf(
+				"This operation requests signer version(s) %v but the client only supports %v",
+				ue.UnsupportedSchemes,
+				internalauth.SupportedSchemes,
+			)
+		}
+	}
+
+	for _, authScheme := range authSchemes {
+		switch authScheme.(type) {
+		case *internalauth.AuthenticationSchemeV4:
+			v4Scheme, _ := authScheme.(*internalauth.AuthenticationSchemeV4)
+			var signingName, signingRegion string
+			if v4Scheme.SigningName == nil {
+				signingName = "iam"
+			} else {
+				signingName = *v4Scheme.SigningName
+			}
+			if v4Scheme.SigningRegion == nil {
+				signingRegion = m.BuiltInResolver.(*builtInResolver).Region
+			} else {
+				signingRegion = *v4Scheme.SigningRegion
+			}
+			if v4Scheme.DisableDoubleEncoding != nil {
+				// The signer sets an equivalent value at client initialization time.
+				// Setting this context value will cause the signer to extract it
+				// and override the value set at client initialization time.
+				ctx = internalauth.SetDisableDoubleEncoding(ctx, *v4Scheme.DisableDoubleEncoding)
+			}
+			ctx = awsmiddleware.SetSigningName(ctx, signingName)
+			ctx = awsmiddleware.SetSigningRegion(ctx, signingRegion)
+			break
+		case *internalauth.AuthenticationSchemeV4A:
+			v4aScheme, _ := authScheme.(*internalauth.AuthenticationSchemeV4A)
+			if v4aScheme.SigningName == nil {
+				v4aScheme.SigningName = aws.String("iam")
+			}
+			if v4aScheme.DisableDoubleEncoding != nil {
+				// The signer sets an equivalent value at client initialization time.
+				// Setting this context value will cause the signer to extract it
+				// and override the value set at client initialization time.
+				ctx = internalauth.SetDisableDoubleEncoding(ctx, *v4aScheme.DisableDoubleEncoding)
+			}
+			ctx = awsmiddleware.SetSigningName(ctx, *v4aScheme.SigningName)
+			ctx = awsmiddleware.SetSigningRegion(ctx, v4aScheme.SigningRegionSet[0])
+			break
+		case *internalauth.AuthenticationSchemeNone:
+			break
+		}
+	}
+
+	return next.HandleSerialize(ctx, in)
+}
+
+func addGetServiceLastAccessedDetailsWithEntitiesResolveEndpointMiddleware(stack *middleware.Stack, options Options) error {
+	return stack.Serialize.Insert(&opGetServiceLastAccessedDetailsWithEntitiesResolveEndpointMiddleware{
+		EndpointResolver: options.EndpointResolverV2,
+		BuiltInResolver: &builtInResolver{
+			Region:       options.Region,
+			UseDualStack: options.EndpointOptions.UseDualStackEndpoint,
+			UseFIPS:      options.EndpointOptions.UseFIPSEndpoint,
+			Endpoint:     options.BaseEndpoint,
+		},
+	}, "ResolveEndpoint", middleware.After)
 }

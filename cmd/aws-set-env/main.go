@@ -4,10 +4,11 @@ package main
 
 import (
 	"flag"
-	"github.com/aaronland/go-aws-auth"
-	"github.com/go-ini/ini"
 	"log"
 	"os"
+	
+	"github.com/aaronland/go-aws-auth"
+	"github.com/go-ini/ini"	
 )
 
 func main() {

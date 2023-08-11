@@ -21,9 +21,15 @@ import (
 // This should be used as the first resolver in the slice of resolvers when
 // resolving external configuration.
 func resolveDefaultAWSConfig(ctx context.Context, cfg *aws.Config, cfgs configs) error {
+	var sources []interface{}
+	for _, s := range cfgs {
+		sources = append(sources, s)
+	}
+
 	*cfg = aws.Config{
-		Credentials: aws.AnonymousCredentials{},
-		Logger:      logging.NewStandardLogger(os.Stderr),
+		Credentials:   aws.AnonymousCredentials{},
+		Logger:        logging.NewStandardLogger(os.Stderr),
+		ConfigSources: sources,
 	}
 	return nil
 }
@@ -97,6 +103,21 @@ func resolveRegion(ctx context.Context, cfg *aws.Config, configs configs) error 
 	}
 
 	cfg.Region = v
+	return nil
+}
+
+// resolveAppID extracts the sdk app ID from the configs slice's SharedConfig or env var
+func resolveAppID(ctx context.Context, cfg *aws.Config, configs configs) error {
+	ID, _, err := getAppID(ctx, configs)
+	if err != nil {
+		return err
+	}
+
+	// if app ID is set in env var, it should precedence shared config value
+	if appID := os.Getenv(`AWS_SDK_UA_APP_ID`); len(appID) > 0 {
+		ID = appID
+	}
+	cfg.AppID = ID
 	return nil
 }
 
