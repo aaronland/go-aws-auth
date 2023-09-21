@@ -9,6 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/iam v1.22.5
 	github.com/aws/aws-sdk-go-v2/service/sts v1.22.0
 	github.com/go-ini/ini v1.67.0
+	github.com/sfomuseum/go-flags v0.10.0
 	github.com/sfomuseum/iso8601duration v1.1.0
 )
 
