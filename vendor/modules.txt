@@ -48,6 +48,11 @@ github.com/aws/aws-sdk-go-v2/internal/endpoints/v2
 # github.com/aws/aws-sdk-go-v2/internal/ini v1.7.3
 ## explicit; go 1.19
 github.com/aws/aws-sdk-go-v2/internal/ini
+# github.com/aws/aws-sdk-go-v2/service/cognitoidentity v1.21.7
+## explicit; go 1.19
+github.com/aws/aws-sdk-go-v2/service/cognitoidentity
+github.com/aws/aws-sdk-go-v2/service/cognitoidentity/internal/endpoints
+github.com/aws/aws-sdk-go-v2/service/cognitoidentity/types
 # github.com/aws/aws-sdk-go-v2/service/iam v1.28.7
 ## explicit; go 1.19
 github.com/aws/aws-sdk-go-v2/service/iam
