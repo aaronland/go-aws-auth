@@ -2,6 +2,7 @@
 // a given profile and multi-factor authentication (MFA) token and then writing that key and secret
 // back to a "credentials" file in a specific profile section. For example, when used in a Makefile with
 // https://github.com/Yubico/yubikey-manager/tree/master/ykman
+//
 //	$(eval CODE := $(shell ykman oath code sfomuseum:aws | awk '{ print $$2 }'))
 //	 bin/$aws-mfa-session -code $(CODE) -duration PT8H
 package main
@@ -15,7 +16,7 @@ import (
 	"time"
 
 	"github.com/aaronland/go-aws-auth"
-	"github.com/sfomuseum/iso8601duration"	
+	"github.com/sfomuseum/iso8601duration"
 )
 
 func readline(prompt string) string {
