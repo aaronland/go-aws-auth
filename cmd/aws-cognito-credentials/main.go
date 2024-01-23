@@ -1,3 +1,4 @@
+// aws-cognito-credentials generates temporary STS credentials for a given user in a Cognito identity pool.
 package main
 
 import (

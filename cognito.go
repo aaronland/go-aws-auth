@@ -10,14 +10,21 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sts/types"
 )
 
+// STSCredentialsForDeveloperIdentityOptions defines configuration options for generating temporary STS (AWS) credentials for a developer identity.
 type STSCredentialsForDeveloperIdentityOptions struct {
-	IdentityPoolId  string
-	Logins          map[string]string
-	RoleArn         string
+	// An identity pool ID in the format REGION:GUID.
+	IdentityPoolId string
+	// A set of name-value pairs that map developer or provider names to a user.
+	Logins map[string]string
+	// The Amazon Resource Name (ARN) of the role that the caller is assuming.
+	RoleArn string
+	// An identifier for the assumed role session.
 	RoleSessionName string
-	Duration        int32
+	// The duration, in seconds, of the role session.
+	Duration int32
 }
 
+// STSCredentialsForDeveloperIdentity generate temporary STS (AWS) credentials for a developer identity.
 func STSCredentialsForDeveloperIdentity(ctx context.Context, aws_cfg aws.Config, opts *STSCredentialsForDeveloperIdentityOptions) (*types.Credentials, error) {
 
 	cognito_client := cognitoidentity.NewFromConfig(aws_cfg)

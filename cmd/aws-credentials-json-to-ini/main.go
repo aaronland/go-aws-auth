@@ -1,3 +1,4 @@
+// aws-credentials-json-to-ini reads JSON-encoded AWS credentials information and generates an AWS ini-style configuration file with those data.
 package main
 
 import (
@@ -33,11 +34,11 @@ func main() {
 	var name string
 	var region string
 
-	flag.StringVar(&infile, "json", "", "...")
-	flag.StringVar(&outfile, "ini", "", "...")
+	flag.StringVar(&infile, "json", "", "Path to the JSON file containing AWS credentials. If \"-\" then data will be read from STDIN.")
+	flag.StringVar(&outfile, "ini", "", "Path to the ini-style file where AWS credentials should be written. If \"-\" then data will be written to STDOUT.")
 
-	flag.StringVar(&name, "name", "default", "...")
-	flag.StringVar(&region, "region", "us-east-1", "...")
+	flag.StringVar(&name, "name", "default", "The name of the ini section where AWS credentials should be written.")
+	flag.StringVar(&region, "region", "us-east-1", "The AWS region for the AWS credentials.")
 
 	flag.Parse()
 
