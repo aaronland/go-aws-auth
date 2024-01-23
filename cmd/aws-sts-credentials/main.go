@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/aaronland/go-aws-auth"
+	"github.com/sfomuseum/go-flags/multi"
 )
 
 func main() {
@@ -19,12 +20,15 @@ func main() {
 	var role_session_name string
 	var duration int
 
-	flag.StringVar(&aws_config_uri, "aws-config-uri", "", "...")
+	var kv_logins multi.KeyValueString
 
-	flag.StringVar(&identity_pool_id, "identity-pool-id", "", "...")
-	flag.StringVar(&role_arn, "role-arn", "", "...")
-	flag.StringVar(&role_session_name, "role-session-name", "", "...")
-	flag.IntVar(&duration, "duration", 300, "...")
+	flag.StringVar(&aws_config_uri, "aws-config-uri", "", "A valid github.com/aaronland/go-aws-auth.Config URI.")
+
+	flag.StringVar(&identity_pool_id, "identity-pool-id", "", "A valid AWS Cognito Identity Pool ID.")
+	flag.StringVar(&role_arn, "role-arn", "", "A valid AWS IAM role ARN to assign to STS credentials.")
+	flag.StringVar(&role_session_name, "role-session-name", "", "An identifier for the assumed role session.")
+	flag.IntVar(&duration, "duration", 900, "The duration, in seconds, of the role session. Can not be less than 900.") // Note: Can not be less than 900
+	flag.Var(&kv_logins, "login", "One or more key=value strings mapping to AWS Cognito authentication providers.")
 
 	flag.Parse()
 
@@ -36,7 +40,11 @@ func main() {
 		log.Fatalf("Failed to derive AWS config, %v", err)
 	}
 
-	logins := make(map[string]string)
+	logins := make(map[string]string, 0)
+
+	for _, kv := range kv_logins {
+		logins[kv.Key()] = kv.Value().(string)
+	}
 
 	opts := &auth.STSCredentialsForDeveloperIdentityOptions{
 		RoleArn:         role_arn,
