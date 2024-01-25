@@ -71,6 +71,8 @@ func STSCredentialsForDeveloperIdentity(ctx context.Context, aws_cfg aws.Config,
 		creds_opts.PolicyArns = session_policies
 	}
 
+	// https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_request.html
+	
 	creds_rsp, err := sts_client.AssumeRoleWithWebIdentity(ctx, creds_opts)
 
 	if err != nil {

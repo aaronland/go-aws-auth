@@ -22,7 +22,8 @@ func main() {
 	var duration int
 
 	var kv_logins multi.KeyValueString
-
+	var session_policies multi.MultiString
+	
 	flag.StringVar(&aws_config_uri, "aws-config-uri", "", "A valid github.com/aaronland/go-aws-auth.Config URI.")
 
 	flag.StringVar(&identity_pool_id, "identity-pool-id", "", "A valid AWS Cognito Identity Pool ID.")
@@ -30,7 +31,8 @@ func main() {
 	flag.StringVar(&role_session_name, "role-session-name", "", "An identifier for the assumed role session.")
 	flag.IntVar(&duration, "duration", 900, "The duration, in seconds, of the role session. Can not be less than 900.") // Note: Can not be less than 900
 	flag.Var(&kv_logins, "login", "One or more key=value strings mapping to AWS Cognito authentication providers.")
-
+	flag.Var(&session_policies, "session-policy", "Zero or more IAM ARNs to use as session policies to supplement the default role ARN.")
+	
 	flag.Parse()
 
 	ctx := context.Background()
@@ -53,6 +55,7 @@ func main() {
 		Duration:        int32(duration),
 		IdentityPoolId:  identity_pool_id,
 		Logins:          logins,
+		Policies: session_policies,
 	}
 
 	creds, err := auth.STSCredentialsForDeveloperIdentity(ctx, cfg, opts)
