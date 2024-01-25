@@ -22,6 +22,8 @@ type STSCredentialsForDeveloperIdentityOptions struct {
 	RoleSessionName string
 	// The duration, in seconds, of the role session.
 	Duration int32
+	// An optional list of Amazon Resource Names (ARNs)  that you want to use as managed session policies.
+	Policies []string
 }
 
 // STSCredentialsForDeveloperIdentity generate temporary STS (AWS) credentials for a developer identity.
@@ -52,6 +54,25 @@ func STSCredentialsForDeveloperIdentity(ctx context.Context, aws_cfg aws.Config,
 		DurationSeconds:  aws.Int32(opts.Duration),
 	}
 
+	// https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/sts#AssumeRoleWithWebIdentityInput
+	// https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html#policies_session
+	
+	if len(opts.Policies) > 0 {
+
+		session_policies := make([]types.PolicyDescriptorType, len(opts.Policies))
+
+		for idx, arn := range opts.Policies {
+
+			session_policies[idx] = types.PolicyDescriptorType{
+				Arn: aws.String(arn),
+			}
+		}
+
+		creds_opts.PolicyArns = session_policies
+	}
+
+	// https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_request.html
+	
 	creds_rsp, err := sts_client.AssumeRoleWithWebIdentity(ctx, creds_opts)
 
 	if err != nil {

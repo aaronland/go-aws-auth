@@ -36,6 +36,8 @@ Usage of ./bin/aws-cognito-credentials:
     	A valid AWS IAM role ARN to assign to STS credentials.
   -role-session-name string
     	An identifier for the assumed role session.
+  -session-policy value
+    	Zero or more IAM ARNs to use as session policies to supplement the default role ARN.	
 ```
 
 For example:
