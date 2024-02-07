@@ -32,6 +32,8 @@ func STSCredentialsForDeveloperIdentity(ctx context.Context, aws_cfg aws.Config,
 	cognito_client := cognitoidentity.NewFromConfig(aws_cfg)
 	sts_client := sts.NewFromConfig(aws_cfg)
 
+	//
+
 	// Get temporary OpenID token from Cognito
 
 	token_opts := &cognitoidentity.GetOpenIdTokenForDeveloperIdentityInput{
@@ -56,7 +58,7 @@ func STSCredentialsForDeveloperIdentity(ctx context.Context, aws_cfg aws.Config,
 
 	// https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/sts#AssumeRoleWithWebIdentityInput
 	// https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html#policies_session
-	
+
 	if len(opts.Policies) > 0 {
 
 		session_policies := make([]types.PolicyDescriptorType, len(opts.Policies))
@@ -72,7 +74,7 @@ func STSCredentialsForDeveloperIdentity(ctx context.Context, aws_cfg aws.Config,
 	}
 
 	// https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_request.html
-	
+
 	creds_rsp, err := sts_client.AssumeRoleWithWebIdentity(ctx, creds_opts)
 
 	if err != nil {
