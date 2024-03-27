@@ -6,4 +6,5 @@ cli:
 	go build -mod $(GOMOD) -ldflags="$(LDFLAGS)" -o bin/aws-get-credentials cmd/aws-get-credentials/main.go
 	go build -mod $(GOMOD) -ldflags="$(LDFLAGS)" -o bin/aws-cognito-credentials cmd/aws-cognito-credentials/main.go
 	go build -mod $(GOMOD) -ldflags="$(LDFLAGS)" -o bin/aws-set-env cmd/aws-set-env/main.go
+	go build -mod $(GOMOD) -ldflags="$(LDFLAGS)" -o bin/aws-sign-request cmd/aws-sign-request/main.go
 	go build -mod $(GOMOD) -ldflags="$(LDFLAGS)" -o bin/aws-credentials-json-to-ini cmd/aws-credentials-json-to-ini/main.go
