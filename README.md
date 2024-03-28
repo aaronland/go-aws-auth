@@ -18,6 +18,7 @@ go build -mod vendor -ldflags="-s -w" -o bin/aws-cognito-credentials cmd/aws-cog
 go build -mod vendor -ldflags="-s -w" -o bin/aws-set-env cmd/aws-set-env/main.go
 go build -mod vendor -ldflags="-s -w" -o bin/aws-sign-request cmd/aws-sign-request/main.go
 go build -mod vendor -ldflags="-s -w" -o bin/aws-credentials-json-to-ini cmd/aws-credentials-json-to-ini/main.go
+go build -mod vendor -ldflags="-s -w" -o bin/aws-imds-credentials cmd/aws-imds-credentials/main.go
 ```
 
 ## aws-cognito-credentials
@@ -106,6 +107,22 @@ $> ./bin/aws-get-credentials -h
 Usage of ./bin/aws-get-credentials:
   -profile string
     	A valid AWS credentials profile (default "default")
+```
+
+### aws-imds-credentials
+
+`aws-imds-credentials` returns the current `aws.Credentials` derived from the EC2 IMDS API. For example:
+
+```
+$> ./bin/aws-imds-credentials | jq
+{
+  "AccessKeyID": "...",
+  "SecretAccessKey": "...",
+  "SessionToken": "...",
+  "Source": "EC2RoleProvider",
+  "CanExpire": true,
+  "Expires": "2024-03-28T19:44:42.59621653Z"
+}
 ```
 
 ### aws-mfa-session
