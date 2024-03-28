@@ -16,6 +16,7 @@ import (
 
 	"github.com/aaronland/go-aws-auth"
 	"github.com/aws/aws-sdk-go-v2/aws/signer/v4"
+	"github.com/aws/smithy-go/logging"
 	"github.com/sfomuseum/go-flags/multi"
 )
 
@@ -30,6 +31,7 @@ func main() {
 	var method string
 	var uri string
 	var do bool
+	var debug bool
 
 	flag.StringVar(&api_signing_name, "api-signing-name", "", "The name the API uses to identify the service the request is scoped to.")
 	flag.StringVar(&api_signing_region, "api-signing-region", "", "If empty then the value of the region associated with the AWS config/credentials will be used.")
@@ -39,6 +41,7 @@ func main() {
 	flag.StringVar(&credentials_uri, "credentials-uri", "", "A valid aaronland/go-aws-auth config URI.")
 	flag.BoolVar(&do, "do", false, "If true then execute the signed request and output the response to STDOUT.")
 	flag.Var(&headers, "header", "Zero or more HTTP headers to assign to the request in the form of key=value.")
+	flag.BoolVar(&debug, "debug", false, "Enable verbose debug logging to STDOUT.")
 
 	flag.Parse()
 
@@ -97,7 +100,12 @@ func main() {
 		req.Header.Set(h.Key(), h.Value().(string))
 	}
 
-	signer := v4.NewSigner()
+	signer := v4.NewSigner(func(opts *v4.SignerOptions) {
+		if debug {
+			opts.LogSigning = true
+			opts.Logger = logging.NewStandardLogger(os.Stdout)
+		}
+	})
 
 	err = signer.SignHTTP(ctx, creds, req, body_sha256, api_signing_name, api_signing_region, time.Now())
 

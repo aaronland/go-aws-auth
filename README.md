@@ -157,6 +157,8 @@ Usage of ./bin/aws-sign-request:
     	If empty then the value of the region associated with the AWS config/credentials will be used.
   -credentials-uri string
     	A valid aaronland/go-aws-auth config URI.
+  -debug
+    	Enable verbose debug logging to STDOUT.	
   -do
     	If true then execute the signed request and output the response to STDOUT.
   -header value
