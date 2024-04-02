@@ -69,25 +69,20 @@ func main() {
 
 	// https://github.com/aws/aws-sdk-go-v2/blob/main/aws/signer/v4/v4.go#L287
 
-	body_sha256 := ""
+	h := sha256.New()
 
-	if body_r.Len() > 0 {
+	_, err = io.Copy(h, body_r)
 
-		h := sha256.New()
+	if err != nil {
+		log.Fatalf("Failed to hash request body, %v", err)
+	}
 
-		_, err := io.Copy(h, body_r)
+	body_sha256 := fmt.Sprintf("%x", h.Sum(nil))
 
-		if err != nil {
-			log.Fatalf("Failed to hash request body, %v", err)
-		}
+	_, err = body_r.Seek(0, 0)
 
-		body_sha256 = fmt.Sprintf("%x", h.Sum(nil))
-
-		_, err = body_r.Seek(0, 0)
-
-		if err != nil {
-			log.Fatalf("Failed to rewind message body, %v", err)
-		}
+	if err != nil {
+		log.Fatalf("Failed to rewind message body, %v", err)
 	}
 
 	req, err := http.NewRequest(method, uri, body_r)
