@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	_ "fmt"
 	"testing"
 )
 
@@ -10,6 +9,7 @@ func TestNewConfig(t *testing.T) {
 
 	uris := []string{
 		"aws://us-east-1?credentials=anon:",
+		"aws://?region=us-east-1&credentials=anon:",
 	}
 
 	ctx := context.Background()
