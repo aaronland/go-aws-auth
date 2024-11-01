@@ -2,8 +2,6 @@
 
 Go package providing methods and tools for determining or assigning AWS credentials.
 
-This package targets [aws-sdk-go-v2](https://github.com/aws/aws-sdk-go-v2/). For similar functionality targeting `aws-sdk-go` please consult the [aaronland/go-aws-session](https://github.com/aaronland/go-aws-session) package.
-
 ## Documentation
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/aaronland/go-aws-auth.svg)](https://pkg.go.dev/github.com/aaronland/go-aws-auth)
