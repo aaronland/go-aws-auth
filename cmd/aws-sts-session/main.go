@@ -46,6 +46,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/aaronland/go-aws-auth"
@@ -75,9 +76,16 @@ func main() {
 
 	flag.BoolVar(&mfa_require, "mfa", true, "Require a valid MFA token code when assuming role.")
 	flag.StringVar(&mfa_serial, "mfa-serial-number", "", "The unique identifier of the MFA device being used for authentication.")
-	flag.StringVar(&mfa_token, "mfa-token", "", "A valid MFA token string.")
+	flag.StringVar(&mfa_token, "mfa-token", "", "A valid MFA token string. If empty then data will be read from a command line prompt.")
 
 	flag.StringVar(&session_profile, "session-profile", "", "The name of the AWS credentials profile to associate the temporary credentials with.")
+	
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Generate STS credentials for a given profile and MFA token and then write those credentials back to an AWS \"credentials\" file in a specific profile section.\n")
+		fmt.Fprintf(os.Stderr, "Usage:\n\t %s [options]\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Valid options are:\n")		
+		flag.PrintDefaults()
+	}
 
 	flag.Parse()
 
