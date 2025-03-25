@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aaronland/go-aws-auth"
+	"github.com/aaronland/go-aws-auth/v2"
 	"github.com/sfomuseum/iso8601duration"
 )
 
@@ -33,16 +33,23 @@ func readline(prompt string) string {
 
 func main() {
 
-	profile := flag.String("profile", "default", "A valid AWS credentials profile")
-	code := flag.String("code", "", "A valid MFA code. If empty the application will block and prompt the user")
-	session_profile := flag.String("session-profile", "session", "The name of the AWS credentials profile to update with session credentials")
-	session_duration := flag.String("duration", "PT1H", "A valid ISO8601 duration string indicating how long the session should last (months are currently not supported)")
+	var device string
+	var profile string
+	var code string
+	var session_profile string
+	var session_duration string
+
+	flag.StringVar(&profile, "profile", "default", "A valid AWS credentials profile")
+	flag.StringVar(&device, "device", "", "The device ID (serial number) used to validate MFA codes")
+	flag.StringVar(&code, "code", "", "A valid MFA code. If empty the application will block and prompt the user")
+	flag.StringVar(&session_profile, "session-profile", "session", "The name of the AWS credentials profile to update with session credentials")
+	flag.StringVar(&session_duration, "duration", "PT1H", "A valid ISO8601 duration string indicating how long the session should last (months are currently not supported)")
 
 	flag.Parse()
 
 	ctx := context.Background()
 
-	d, err := duration.FromString(*session_duration)
+	d, err := duration.FromString(session_duration)
 
 	if err != nil {
 		log.Fatalf("Failed to parse session duration, %v", err)
@@ -57,30 +64,30 @@ func main() {
 		log.Fatalf("Failed to create new credentials, %v", err)
 	}
 
-	aws_cfg, err := creds.AWSConfigWithProfile(ctx, *profile)
+	aws_cfg, err := creds.AWSConfigWithProfile(ctx, profile)
 
 	if err != nil {
 		log.Fatalf("Failed to create AWS config, %v", err)
 	}
 
-	*code = strings.TrimSpace(*code)
+	code = strings.TrimSpace(code)
 
-	if *code == "" {
+	if code == "" {
 
-		*code = readline("Enter your MFA token code:")
+		code = readline("Enter your MFA token code:")
 
-		if *code == "" {
+		if code == "" {
 			log.Fatalf("Missing MFA code")
 		}
 	}
 
-	session_creds, err := auth.GetCredentialsWithMFAWithContext(ctx, aws_cfg, *code, ttl_32)
+	session_creds, err := auth.GetCredentialsWithMFAWithContext(ctx, aws_cfg, device, code, ttl_32)
 
 	if err != nil {
 		log.Fatalf("Failed to get credentials with MFA, %v", err)
 	}
 
-	err = creds.SetSessionCredentialsWithProfile(ctx, *session_profile, session_creds)
+	err = creds.SetSessionCredentialsWithProfile(ctx, session_profile, session_creds)
 
 	if err != nil {
 		log.Fatalf("Failed to get credentials with session profile, %v", err)
@@ -89,5 +96,5 @@ func main() {
 	now := time.Now()
 	then := now.Add(d.ToDuration())
 
-	log.Printf("Updated session credentials for '%s' profile, expires %s (%s)\n", *session_profile, then.Format(time.Stamp), *session_creds.Expiration)
+	log.Printf("Updated session credentials for '%s' profile, expires %s (%s)\n", session_profile, then.Format(time.Stamp), *session_creds.Expiration)
 }

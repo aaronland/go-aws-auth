@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/aaronland/go-aws-auth"
+	"github.com/aaronland/go-aws-auth/v2"
 )
 
 func main() {

@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/aaronland/go-aws-auth"
+	"github.com/aaronland/go-aws-auth/v2"
 	"github.com/sfomuseum/go-flags/multi"
 )
 
