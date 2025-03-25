@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aaronland/go-aws-auth"
+	"github.com/aaronland/go-aws-auth/v2"
 	"github.com/aws/aws-sdk-go-v2/aws/signer/v4"
 	"github.com/aws/smithy-go/logging"
 	"github.com/sfomuseum/go-flags/multi"
