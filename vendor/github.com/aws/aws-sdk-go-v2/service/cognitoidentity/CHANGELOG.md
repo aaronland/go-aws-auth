@@ -1,3 +1,28 @@
+# v1.29.9 (2025-07-22)
+
+* No change notes available for this release.
+
+# v1.29.8 (2025-07-21)
+
+* No change notes available for this release.
+
+# v1.29.7 (2025-07-19)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.29.6 (2025-06-17)
+
+* **Dependency Update**: Update to smithy-go v1.22.4.
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.29.5 (2025-06-10)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.29.4 (2025-04-03)
+
+* No change notes available for this release.
+
 # v1.29.3 (2025-03-14)
 
 * **Documentation**: Updated API model build artifacts for identity pools
